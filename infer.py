@@ -5,10 +5,10 @@ import click
 import librosa
 import yaml
 
-import inference
-from utils.config_utils import print_config
-from utils.infer_utils import build_midi_file
-from utils.slicer2 import Slicer
+from . import inference
+from .utils.config_utils import print_config
+from .utils.infer_utils import build_midi_file
+from .utils.slicer2 import Slicer
 
 
 @click.command(help='Run inference with a trained model')

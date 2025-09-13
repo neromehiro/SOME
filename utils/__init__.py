@@ -8,7 +8,7 @@ from collections import OrderedDict
 import numpy as np
 import torch
 
-from utils.training_utils import get_latest_checkpoint_path
+from .training_utils import get_latest_checkpoint_path
 
 
 def tensors_to_scalars(metrics):

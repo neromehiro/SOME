@@ -12,7 +12,7 @@ from lightning.pytorch.utilities.rank_zero import rank_zero_info
 from torch.optim.lr_scheduler import LambdaLR
 from torch.utils.data.distributed import Sampler
 
-import utils
+from . import __init__ as utils
 
 
 # ==========LR schedulers==========

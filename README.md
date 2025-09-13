@@ -1,3 +1,6 @@
+cd "/Users/neromehiro/hiro folder/my_Works/programing/SOME" ; python SOME/infer.py --model ./SOME/experiments/some-v0.0.1/model_ckpt_steps_100000_simplified.ckpt --wav ./SOME/data/さいた.wav
+
+
 # SOME
 SOME: Singing-Oriented MIDI Extractor.
 

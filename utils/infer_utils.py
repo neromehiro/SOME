@@ -77,14 +77,22 @@ def decode_note_sequence(frame2item, values, masks, threshold=0.5):
 
 
 def build_midi_file(offsets: List[float], segments: List[Dict[str, np.ndarray]], tempo=120) -> mido.MidiFile:
+    # ticks_per_beat は mido の既定値 480。時間->tick 変換は tps = tpb * tempo / 60
     midi_file = mido.MidiFile(charset='utf8')
+    tpb = midi_file.ticks_per_beat
+    ticks_per_second = tpb * (tempo / 60.0)
     midi_track = mido.MidiTrack()
     midi_track.append(mido.MetaMessage('set_tempo', tempo=mido.bpm2tempo(tempo), time=0))
     last_time = 0
-    offsets = [round(o * tempo * 8) for o in offsets]
+    # offsets は秒単位
+    offsets = [int(round(o * ticks_per_second)) for o in offsets]
     for i, (offset, segment) in enumerate(zip(offsets, segments)):
         note_midi = np.round(segment['note_midi']).astype(np.int64).tolist()
-        note_tick = np.diff(np.round(np.cumsum(segment['note_dur']) * tempo * 8).astype(np.int64), prepend=0).tolist()
+        # note_dur は秒単位
+        note_tick = np.diff(
+            np.round(np.cumsum(segment['note_dur']) * ticks_per_second).astype(np.int64),
+            prepend=0
+        ).tolist()
         note_rest = segment['note_rest'].tolist()
         start = offset
         for j in range(len(note_midi)):
