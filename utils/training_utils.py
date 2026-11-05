@@ -12,7 +12,11 @@ from lightning.pytorch.utilities.rank_zero import rank_zero_info
 from torch.optim.lr_scheduler import LambdaLR
 from torch.utils.data.distributed import Sampler
 
-from . import __init__ as utils
+# 新しいPythonでは `from . import __init__` が method-wrapper に解決されるため、
+# パッケージ自身を sys.modules から取得する (batch_by_size 等は利用時には定義済み)
+import sys as _sys
+
+utils = _sys.modules[__package__]
 
 
 # ==========LR schedulers==========

@@ -1,0 +1,89 @@
+# SOME ファインチューン (2026-07-04)
+# ベース: experiments/some-v0.0.1/config.yaml (アーキテクチャ・前処理は同一)
+# データ: 合成362曲 (batch_synthv random_freeform, 完全ノートラベル) + 実69曲 (分離ボーカル+truth)
+#         fixed test 10曲は含まない (e_train_test/e_some_dataset_20260704.py で除外済み)
+base_config: configs/base.yaml
+
+binarizer_cls: preprocessing.MIDIExtractionBinarizer
+task_cls: training.MIDIExtractionTask
+model_cls: modules.model.Gmidi_conform.midi_conforms
+
+raw_data_dir:
+  - data/ft_dataset/synth
+  - data/ft_dataset/real
+binary_data_dir: data/ft_binary
+
+binarization_args:
+  merge_rest: true
+  merge_slur: false
+  num_workers: 8
+  round_midi: false
+  shuffle: true
+  skip_glide: true
+  slur_tolerance: 0.5
+
+units_encoder: mel
+units_dim: 80
+pe: rmvpe
+pe_ckpt: pretrained/rmvpe/model.pt
+audio_sample_rate: 44100
+hop_size: 512
+win_size: 2048
+fmin: 40
+fmax: 8000
+key_shift_factor: 8
+key_shift_range: [-12, 12]
+midi_prob_deviation: 1.0
+rest_threshold: 0.1
+
+midi_extractor_args:
+  attention_drop: 0.1
+  attention_heads: 8
+  attention_heads_dim: 64
+  conv_drop: 0.1
+  dim: 512
+  ffn_latent_drop: 0.1
+  ffn_out_drop: 0.1
+  kernel_size: 31
+  lay: 8
+  use_lay_skip: true
+
+finetune_enabled: true
+finetune_ckpt_path: experiments/some-v0.0.1/model_ckpt_steps_100000_simplified.ckpt
+finetune_ignored_params: []
+finetune_strict_shapes: true
+
+optimizer_args:
+  optimizer_cls: torch.optim.AdamW
+  lr: 0.0001
+  beta1: 0.9
+  beta2: 0.98
+  weight_decay: 0
+lr_scheduler_args:
+  scheduler_cls: lr_scheduler.scheduler.WarmupLR
+  warmup_steps: 1000
+  min_lr: 1.0e-05
+
+max_batch_frames: 80000
+max_batch_size: 20
+max_updates: 30000
+val_check_interval: 1000
+num_ckpt_keep: 5
+permanent_ckpt_start: 30000
+permanent_ckpt_interval: 10000
+pl_trainer_precision: bf16-mixed
+
+# validation: 合成8曲ぶん + 実4曲ぶんのセグメントを prefix 指定 (学習から除外される)
+test_prefixes:
+  - 0:random_freeform_10_
+  - 0:random_freeform_50_
+  - 0:random_freeform_90_
+  - 0:random_freeform_130_
+  - 0:random_freeform_170_
+  - 0:random_freeform_210_
+  - 0:random_freeform_250_
+  - 0:random_freeform_290_
+  - 1:real_20260415_092007_Kinokoteikoku
+  - 1:real_20260424_210253_SHISHAMO
+  - 1:real_20260522_151010_Fujifabric
+  - 1:real_20260605_183414_amazarashi

@@ -15,11 +15,12 @@ from .base_infer import BaseInference
 class MIDIExtractionInference(BaseInference):
     def __init__(self, config: dict, model_path: pathlib.Path, device=None):
         super().__init__(config, model_path, device=device)
+        self.feature_device = 'cpu' if str(self.device).startswith('mps') else self.device
         self.mel_spec = rmvpe.MelSpectrogram(
             n_mel_channels=self.config['units_dim'], sampling_rate=self.config['audio_sample_rate'],
             win_length=self.config['win_size'], hop_length=self.config['hop_size'],
             mel_fmin=self.config['fmin'], mel_fmax=self.config['fmax']
-        ).to(self.device)
+        ).to(self.feature_device)
         self.rmvpe = None
         self.midi_min = self.config['midi_min']
         self.midi_max = self.config['midi_max']
@@ -27,8 +28,8 @@ class MIDIExtractionInference(BaseInference):
         self.rest_threshold = self.config['rest_threshold']
 
     def preprocess(self, waveform: np.ndarray) -> Dict[str, torch.Tensor]:
-        wav_tensor = torch.from_numpy(waveform).unsqueeze(0).to(self.device)
-        units = self.mel_spec(wav_tensor).transpose(1, 2)
+        wav_tensor = torch.from_numpy(waveform).unsqueeze(0).to(self.feature_device)
+        units = self.mel_spec(wav_tensor).transpose(1, 2).to(self.device)
         length = units.shape[1]
         # f0_algo = self.config['pe']
         # if f0_algo == 'parselmouth':
